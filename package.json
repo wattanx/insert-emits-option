@@ -1,0 +1,34 @@
+{
+  "name": "insert-emits-option",
+  "version": "0.0.1",
+  "description": "Insert emits option into defineComponent.",
+  "main": "index.js",
+  "bin": {
+    "insert-emits-option": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "node dist/cli.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wattanx/insert-emits-option.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wattanx/insert-emits-option/issues"
+  },
+  "homepage": "https://github.com/wattanx/insert-emits-option#readme",
+  "devDependencies": {
+    "@types/node": "^18.11.9",
+    "@types/yargs": "^17.0.13",
+    "@vue/compiler-sfc": "^3.2.45",
+    "typescript": "^4.9.3",
+    "vitest": "^0.25.2"
+  },
+  "dependencies": {
+    "ts-morph": "^16.0.0",
+    "yargs": "^17.6.2"
+  }
+}
