@@ -5,14 +5,14 @@ export const insertEmitsOption = (sourceFile: SourceFile) => {
   const callexpression = getNodeByKind(sourceFile, SyntaxKind.CallExpression);
 
   if (!callexpression) {
-    throw new Error("defineComponent is not found.");
+    return;
   }
   if (!Node.isCallExpression(callexpression)) {
-    throw new Error("defineComponent is not found.");
+    return;
   }
 
   if (!isDefineComponent(callexpression)) {
-    throw new Error("defineComponent is not found.");
+    return;
   }
   const optionsNode = getNodeByKind(
     callexpression,
@@ -20,10 +20,14 @@ export const insertEmitsOption = (sourceFile: SourceFile) => {
   );
 
   if (!Node.isObjectLiteralExpression(optionsNode)) {
-    throw new Error("defineComponent is not found.");
+    return;
   }
 
   const emits = convertToEmits(callexpression);
+
+  if (emits.length === 0) {
+    return;
+  }
 
   optionsNode.addProperty(`emits: [${emits.join(",")}]`);
 };
@@ -32,13 +36,13 @@ const convertToEmits = (node: CallExpression) => {
   const setupNode = getNodeByKind(node, SyntaxKind.MethodDeclaration);
 
   if (!setupNode) {
-    throw new Error("setup is not found.");
+    return [];
   }
 
   const blockNode = getNodeByKind(setupNode, SyntaxKind.Block);
 
   if (!blockNode) {
-    throw new Error("setup is not found.");
+    return [];
   }
 
   const emitsCallExpressions = blockNode
@@ -48,7 +52,7 @@ const convertToEmits = (node: CallExpression) => {
 
   const emits = emitsCallExpressions.map((x) => x.getArguments()[0].getText());
 
-  return emits;
+  return emits.filter((x) => x !== "");
 };
 
 const isDefineComponent = (node: CallExpression) => {
