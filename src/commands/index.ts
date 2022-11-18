@@ -8,7 +8,7 @@ type Options = {
 };
 
 export const command = "* [targetFilePaths...]";
-export const desc = "Suppress TS errors in Vue files";
+export const desc = "Insert emits option in Vue files";
 
 export const builder = (yargs: Argv<Options>): Argv<Options> =>
   yargs.options(DEFAULT_OPTIONS).positional("targetFilePaths", {
