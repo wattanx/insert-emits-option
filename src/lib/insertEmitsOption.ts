@@ -5,14 +5,20 @@ export const insertEmitsOption = (sourceFile: SourceFile) => {
   const callexpression = getNodeByKind(sourceFile, SyntaxKind.CallExpression);
 
   if (!callexpression) {
-    return;
+    return {
+      result: false,
+    };
   }
   if (!Node.isCallExpression(callexpression)) {
-    return;
+    return {
+      result: false,
+    };
   }
 
   if (!isDefineComponent(callexpression)) {
-    return;
+    return {
+      result: false,
+    };
   }
   const optionsNode = getNodeByKind(
     callexpression,
@@ -20,16 +26,24 @@ export const insertEmitsOption = (sourceFile: SourceFile) => {
   );
 
   if (!Node.isObjectLiteralExpression(optionsNode)) {
-    return;
+    return {
+      result: false,
+    };
   }
 
   const emits = convertToEmits(callexpression);
 
   if (emits.length === 0) {
-    return;
+    return {
+      result: false,
+    };
   }
 
   optionsNode.addProperty(`emits: [${emits.join(",")}]`);
+
+  return {
+    result: true,
+  };
 };
 
 const convertToEmits = (node: CallExpression) => {

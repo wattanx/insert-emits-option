@@ -32,7 +32,12 @@ export const handleCommand = async (
   });
 
   for (const file of targetFilesWithSourceFile) {
-    insertEmitsOption(file.sourceFile);
+    const { result } = insertEmitsOption(file.sourceFile);
+
+    if (!result) {
+      continue;
+    }
+
     const newText = file.fullText.replace(file.script, file.sourceFile.print());
     await writeFile(file.path, newText);
   }
