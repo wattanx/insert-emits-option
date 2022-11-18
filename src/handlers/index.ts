@@ -31,6 +31,7 @@ export const handleCommand = async (
     };
   });
 
+  let insertedCount = 0;
   for (const file of targetFilesWithSourceFile) {
     const { result } = insertEmitsOption(file.sourceFile);
 
@@ -40,5 +41,10 @@ export const handleCommand = async (
 
     const newText = file.fullText.replace(file.script, file.sourceFile.print());
     await writeFile(file.path, newText);
+    insertedCount += 1;
   }
+
+  return {
+    insertedCount,
+  };
 };
