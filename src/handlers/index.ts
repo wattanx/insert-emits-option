@@ -39,7 +39,10 @@ export const handleCommand = async (
       continue;
     }
 
-    const newText = file.fullText.replace(file.script, file.sourceFile.print());
+    const newText = file.fullText.replace(
+      file.script,
+      file.sourceFile.getFullText()
+    );
     await writeFile(file.path, newText);
     insertedCount += 1;
   }
