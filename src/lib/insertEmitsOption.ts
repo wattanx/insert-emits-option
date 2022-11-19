@@ -1,5 +1,11 @@
 import { getNodeByKind } from "./getNodeByKind";
-import { Node, SourceFile, SyntaxKind, CallExpression } from "ts-morph";
+import {
+  Node,
+  SourceFile,
+  SyntaxKind,
+  CallExpression,
+  PropertyAssignment,
+} from "ts-morph";
 
 export const insertEmitsOption = (sourceFile: SourceFile) => {
   const callexpression = getNodeByKind(sourceFile, SyntaxKind.CallExpression);
@@ -31,6 +37,14 @@ export const insertEmitsOption = (sourceFile: SourceFile) => {
     };
   }
 
+  const hasEmitsOption = getOptionsNode(callexpression, "emits");
+
+  if (hasEmitsOption) {
+    return {
+      result: false,
+    };
+  }
+
   const emits = convertToEmits(callexpression);
 
   if (emits.length === 0) {
@@ -43,6 +57,7 @@ export const insertEmitsOption = (sourceFile: SourceFile) => {
 
   return {
     result: true,
+    emits,
   };
 };
 
@@ -75,4 +90,30 @@ const isDefineComponent = (node: CallExpression) => {
   }
 
   return node.getExpression().getText() === "defineComponent";
+};
+
+export const getOptionsNode = (node: CallExpression, type: "emits") => {
+  const expression = getNodeByKind(node, SyntaxKind.ObjectLiteralExpression);
+
+  if (!expression) {
+    throw new Error("props is not found.");
+  }
+  if (!Node.isObjectLiteralExpression(expression)) {
+    throw new Error("props is not found.");
+  }
+
+  const properties = expression
+    .getProperties()
+    .filter((x) => x.getKind() === SyntaxKind.PropertyAssignment);
+
+  const propsNode = properties.find((x) => {
+    const identifiler = (x as PropertyAssignment).getName();
+    return identifiler === type;
+  });
+
+  if (!propsNode) {
+    return;
+  }
+
+  return propsNode as PropertyAssignment;
 };
