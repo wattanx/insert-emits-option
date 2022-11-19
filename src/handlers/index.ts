@@ -12,11 +12,14 @@ export const handleCommand = async (
   const allFiles = await Promise.all(
     targetFilePaths.map(async (path) => {
       const fullText = await readFile(path, "utf8");
-      const script = parse(fullText).descriptor.script?.content ?? "";
+      const descriptor = parse(fullText).descriptor;
+      const script = descriptor.script?.content ?? "";
+      const template = descriptor.template?.content ?? "";
       return {
         path,
         fullText,
         script,
+        template,
       };
     })
   );
@@ -38,7 +41,7 @@ export const handleCommand = async (
 
   let insertedCount = 0;
   for (const file of targetFilesWithSourceFile) {
-    const { result } = insertEmitsOption(file.sourceFile);
+    const { result } = insertEmitsOption(file.sourceFile, file.template);
 
     if (!result) {
       progressBar.increment();

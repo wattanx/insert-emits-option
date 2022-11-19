@@ -7,7 +7,7 @@ import {
   PropertyAssignment,
 } from "ts-morph";
 
-export const insertEmitsOption = (sourceFile: SourceFile) => {
+export const insertEmitsOption = (sourceFile: SourceFile, template: string) => {
   const callexpression = getNodeByKind(sourceFile, SyntaxKind.CallExpression);
 
   if (!callexpression) {
@@ -15,6 +15,7 @@ export const insertEmitsOption = (sourceFile: SourceFile) => {
       result: false,
     };
   }
+
   if (!Node.isCallExpression(callexpression)) {
     return {
       result: false,
@@ -45,13 +46,17 @@ export const insertEmitsOption = (sourceFile: SourceFile) => {
     };
   }
 
-  const emits = convertToEmits(callexpression);
+  const scriptEmits = convertToEmits(callexpression);
 
-  if (emits.length === 0) {
+  const templateEmits = convertToEmitsFromTemplate(template);
+
+  if (scriptEmits.length === 0 && templateEmits.length === 0) {
     return {
       result: false,
     };
   }
+
+  const emits = [...new Set([...scriptEmits, ...templateEmits])];
 
   optionsNode.addProperty(`emits: [${emits.join(",")}]`);
 
@@ -116,4 +121,14 @@ export const getOptionsNode = (node: CallExpression, type: "emits") => {
   }
 
   return propsNode as PropertyAssignment;
+};
+
+const convertToEmitsFromTemplate = (src: string) => {
+  const match = [...src.matchAll(/\$emit\((.*).*\)/g)];
+
+  if (match) {
+    return match.map((x) => x[1]);
+  }
+
+  return "";
 };
