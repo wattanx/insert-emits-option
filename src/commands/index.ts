@@ -1,6 +1,7 @@
 import { DEFAULT_OPTIONS } from "./../lib/constants";
 import type { Arguments, Argv } from "yargs";
 import { handleCommand } from "../handlers";
+import { green } from "colorette";
 
 type Options = {
   targetFilePaths: string[];
@@ -22,6 +23,7 @@ export const builder = (yargs: Argv<Options>): Argv<Options> =>
 export const handler = async (argv: Arguments<Options>): Promise<void> => {
   const { targetFilePaths, tsconfigPath } = argv;
   const { insertedCount } = await handleCommand(targetFilePaths, tsconfigPath);
-  console.log(`${insertedCount} files changed.`);
+
   console.log("\nCompleted 🎉");
+  console.log(`${green(insertedCount)} files changed.`);
 };

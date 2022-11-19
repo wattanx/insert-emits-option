@@ -1,6 +1,8 @@
 import { parse } from "@vue/compiler-sfc";
+import { green } from "colorette";
 import { readFile, writeFile } from "fs/promises";
 import { Project } from "ts-morph";
+import { generateProgressBar } from "../lib/generateProgressBar";
 import { insertEmitsOption } from "../lib/insertEmitsOption";
 
 export const handleCommand = async (
@@ -21,6 +23,9 @@ export const handleCommand = async (
 
   const targetFiles = allFiles.filter((file) => file.script !== "");
 
+  const progressBar = generateProgressBar(green);
+  progressBar.start(targetFiles.length, 0);
+
   const project = new Project({ tsConfigFilePath: tsconfigPath });
   const targetFilesWithSourceFile = targetFiles.map((file) => {
     const sourceFile = project.createSourceFile(`${file.path}.ts`, file.script);
@@ -36,6 +41,7 @@ export const handleCommand = async (
     const { result } = insertEmitsOption(file.sourceFile);
 
     if (!result) {
+      progressBar.increment();
       continue;
     }
 
@@ -46,6 +52,7 @@ export const handleCommand = async (
     await writeFile(file.path, newText);
     insertedCount += 1;
   }
+  progressBar.stop();
 
   return {
     insertedCount,
