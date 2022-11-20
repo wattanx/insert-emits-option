@@ -53,6 +53,12 @@ export const insertEmitsOption = (sourceFile: SourceFile, template: string) => {
 
   const scriptEmits = convertToEmits(callexpression);
 
+  if (scriptEmits.length === 0 && templateEmits.length === 0) {
+    return {
+      result: false,
+    };
+  }
+
   const emits = [...new Set([...scriptEmits, ...templateEmits])];
 
   optionsNode.addProperty(`emits: [${emits.join(",")}]`);
