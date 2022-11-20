@@ -77,7 +77,7 @@ it("template emit with event props", () => {
   const template = `
   <template>
     <div>
-      <button @click="$emit('save', 'test')">SAVE</button>
+      <button @click="$emit('save', $event)">SAVE</button>
       <button @click="$emit('cancel')">CANCEl</button>
     </div>
   </template>`;

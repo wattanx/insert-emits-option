@@ -54,6 +54,7 @@ export const handleCommand = async (
     );
     await writeFile(file.path, newText);
     insertedCount += 1;
+    progressBar.increment();
   }
   progressBar.stop();
 
