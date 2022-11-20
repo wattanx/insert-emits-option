@@ -40,7 +40,7 @@ export const handleCommand = async (
   });
 
   let insertedCount = 0;
-  for (const file of targetFilesWithSourceFile) {
+  for await (const file of targetFilesWithSourceFile) {
     const { result } = insertEmitsOption(file.sourceFile, file.template);
 
     if (!result) {
@@ -52,10 +52,13 @@ export const handleCommand = async (
       file.script,
       file.sourceFile.getFullText()
     );
+
     await writeFile(file.path, newText);
+
     insertedCount += 1;
     progressBar.increment();
   }
+
   progressBar.stop();
 
   return {
