@@ -5,34 +5,24 @@ import {
   SyntaxKind,
   CallExpression,
   PropertyAssignment,
+  ObjectLiteralExpression,
 } from "ts-morph";
 
 export const insertEmitsOption = (sourceFile: SourceFile, template: string) => {
-  const callexpression = getNodeByKind(sourceFile, SyntaxKind.CallExpression);
+  const exportAssignment = getNodeByKind(
+    sourceFile,
+    SyntaxKind.ExportAssignment
+  );
+
   const templateEmits = convertToEmitsFromTemplate(template);
 
-  if (!callexpression && templateEmits.length === 0) {
+  if (!exportAssignment && templateEmits.length === 0) {
     return {
       result: false,
     };
   }
 
-  if (!Node.isCallExpression(callexpression)) {
-    return {
-      result: false,
-      emits: templateEmits,
-    };
-  }
-
-  const hasEmitsOption = getOptionsNode(callexpression, "emits");
-
-  if (hasEmitsOption) {
-    return {
-      result: false,
-    };
-  }
-
-  if (!isDefineComponent(callexpression)) {
+  if (!exportAssignment) {
     return {
       result: false,
       emits: templateEmits,
@@ -40,7 +30,7 @@ export const insertEmitsOption = (sourceFile: SourceFile, template: string) => {
   }
 
   const optionsNode = getNodeByKind(
-    callexpression,
+    exportAssignment,
     SyntaxKind.ObjectLiteralExpression
   );
 
@@ -51,7 +41,15 @@ export const insertEmitsOption = (sourceFile: SourceFile, template: string) => {
     };
   }
 
-  const scriptEmits = convertToEmits(callexpression);
+  const hasEmitsOption = getPropertyNode(optionsNode, "emits");
+
+  if (hasEmitsOption) {
+    return {
+      result: false,
+    };
+  }
+
+  const scriptEmits = convertToEmits(optionsNode);
 
   if (scriptEmits.length === 0 && templateEmits.length === 0) {
     return {
@@ -69,22 +67,9 @@ export const insertEmitsOption = (sourceFile: SourceFile, template: string) => {
   };
 };
 
-const convertToEmits = (node: CallExpression) => {
-  const setupNode = getNodeByKind(node, SyntaxKind.MethodDeclaration);
-
-  if (!setupNode) {
-    return [];
-  }
-
-  const blockNode = getNodeByKind(setupNode, SyntaxKind.Block);
-
-  if (!blockNode) {
-    return [];
-  }
-
-  const emitsCallExpressions = blockNode
-    .forEachDescendantAsArray()
-    .filter((x) => x.getKind() === SyntaxKind.CallExpression)
+const convertToEmits = (node: ObjectLiteralExpression) => {
+  const emitsCallExpressions = node
+    .getDescendantsOfKind(SyntaxKind.CallExpression)
     .filter((x) => x.getFullText().includes("emit")) as CallExpression[];
 
   const emits = emitsCallExpressions.map((x) => x.getArguments()[0].getText());
@@ -92,24 +77,10 @@ const convertToEmits = (node: CallExpression) => {
   return emits.filter((x) => x !== "");
 };
 
-const isDefineComponent = (node: CallExpression) => {
-  if (!Node.isIdentifier(node.getExpression())) {
-    return false;
-  }
-
-  return node.getExpression().getText() === "defineComponent";
-};
-
-export const getOptionsNode = (node: CallExpression, type: "emits") => {
-  const expression = getNodeByKind(node, SyntaxKind.ObjectLiteralExpression);
-
-  if (!expression) {
-    throw new Error("props is not found.");
-  }
-  if (!Node.isObjectLiteralExpression(expression)) {
-    throw new Error("props is not found.");
-  }
-
+export const getPropertyNode = (
+  expression: ObjectLiteralExpression,
+  type: "emits"
+) => {
   const properties = expression
     .getProperties()
     .filter((x) => x.getKind() === SyntaxKind.PropertyAssignment);
