@@ -1,6 +1,6 @@
 {
   "name": "@wattanx/insert-emits-option",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "Insert emits option into defineComponent.",
   "main": "index.js",
   "bin": {
