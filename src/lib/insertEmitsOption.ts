@@ -9,8 +9,9 @@ import {
 
 export const insertEmitsOption = (sourceFile: SourceFile, template: string) => {
   const callexpression = getNodeByKind(sourceFile, SyntaxKind.CallExpression);
+  const templateEmits = convertToEmitsFromTemplate(template);
 
-  if (!callexpression) {
+  if (!callexpression && templateEmits.length === 0) {
     return {
       result: false,
     };
@@ -19,22 +20,7 @@ export const insertEmitsOption = (sourceFile: SourceFile, template: string) => {
   if (!Node.isCallExpression(callexpression)) {
     return {
       result: false,
-    };
-  }
-
-  if (!isDefineComponent(callexpression)) {
-    return {
-      result: false,
-    };
-  }
-  const optionsNode = getNodeByKind(
-    callexpression,
-    SyntaxKind.ObjectLiteralExpression
-  );
-
-  if (!Node.isObjectLiteralExpression(optionsNode)) {
-    return {
-      result: false,
+      emits: templateEmits,
     };
   }
 
@@ -46,11 +32,28 @@ export const insertEmitsOption = (sourceFile: SourceFile, template: string) => {
     };
   }
 
+  if (!isDefineComponent(callexpression)) {
+    return {
+      result: false,
+      emits: templateEmits,
+    };
+  }
+
+  const optionsNode = getNodeByKind(
+    callexpression,
+    SyntaxKind.ObjectLiteralExpression
+  );
+
+  if (!Node.isObjectLiteralExpression(optionsNode)) {
+    return {
+      result: false,
+      emits: templateEmits,
+    };
+  }
+
   const scriptEmits = convertToEmits(callexpression);
 
-  const templateEmits = convertToEmitsFromTemplate(template);
-
-  if (scriptEmits.length === 0 && templateEmits.length === 0) {
+  if (scriptEmits.length === 0) {
     return {
       result: false,
     };
@@ -127,8 +130,9 @@ const convertToEmitsFromTemplate = (src: string) => {
   const match = [...src.matchAll(/\$emit\((.*).*\)/g)];
 
   if (match) {
-    return match.map((x) => x[1]);
+    // $emit('save', 'value') -> ["$emit('save', 'value')", "'save', 'value'"] -> ["'save', 'value'"] -> ["'save'"]
+    return match.map((x) => x[1].split(",")[0]);
   }
 
-  return "";
+  return [];
 };

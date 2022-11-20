@@ -11,7 +11,8 @@
   ],
   "scripts": {
     "build": "tsc",
-    "test": "node dist/cli.js"
+    "test:cli": "node dist/cli.js",
+    "test": "vitest"
   },
   "repository": {
     "type": "git",
