@@ -117,3 +117,28 @@ it("template emit and setup emit", () => {
 
   expect(emits).toEqual(["'change'", "'save'", "'cancel'"]);
 });
+
+it("only template emit", () => {
+  const script = `
+  export default defineComponent({
+    setup(props, { emit }) {
+      
+    }
+  })
+  `;
+
+  const template = `
+  <template>
+    <div>
+      <button @click="$emit('save', 'test')">SAVE</button>
+      <button @click="$emit('cancel')">CANCEl</button>
+    </div>
+  </template>`;
+
+  const project = new Project({ tsConfigFilePath: "tsconfig.json" });
+  const sourceFile = project.createSourceFile("test.ts", script);
+
+  const { emits } = insertEmitsOption(sourceFile, template);
+
+  expect(emits).toEqual(["'save'", "'cancel'"]);
+});
