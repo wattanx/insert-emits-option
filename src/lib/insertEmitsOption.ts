@@ -76,7 +76,9 @@ const convertToEmits = (node: ObjectLiteralExpression) => {
     return [];
   }
 
-  const emits = emitsCallExpressions.map((x) => x.getArguments()[0].getText());
+  const emits = emitsCallExpressions
+    .filter((x) => x.getArguments().length !== 0)
+    .map((x) => x.getArguments()[0].getText());
 
   return emits.filter((x) => x !== "");
 };
