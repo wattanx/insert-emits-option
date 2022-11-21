@@ -72,6 +72,10 @@ const convertToEmits = (node: ObjectLiteralExpression) => {
     .getDescendantsOfKind(SyntaxKind.CallExpression)
     .filter((x) => x.getFullText().includes("emit")) as CallExpression[];
 
+  if (emitsCallExpressions.length === 0) {
+    return [];
+  }
+
   const emits = emitsCallExpressions.map((x) => x.getArguments()[0].getText());
 
   return emits.filter((x) => x !== "");
