@@ -70,7 +70,7 @@ export const insertEmitsOption = (sourceFile: SourceFile, template: string) => {
 const convertToEmits = (node: ObjectLiteralExpression) => {
   const emitsCallExpressions = node
     .getDescendantsOfKind(SyntaxKind.CallExpression)
-    .filter((x) => x.getExpression().getText().includes("emit"));
+    .filter((x) => hasEmit(x));
 
   if (emitsCallExpressions.length === 0) {
     return [];
@@ -81,6 +81,23 @@ const convertToEmits = (node: ObjectLiteralExpression) => {
     .map((x) => x.getArguments()[0].getText());
 
   return emits.filter((x) => x !== "");
+};
+
+const hasEmit = (callexpression: CallExpression) => {
+  const expression = callexpression.getExpression();
+  if (expression.getText() === "emit") {
+    return true;
+  }
+
+  if (
+    Node.isPropertyAccessExpression(expression) &&
+    (expression.getName() === "$emit" || expression.getName() === "emit")
+  ) {
+    // (e.g.) ctx.emit, this.$emit
+    return true;
+  }
+
+  return false;
 };
 
 export const getPropertyNode = (
