@@ -20,6 +20,26 @@ describe("composition api", () => {
     expect(emits).toEqual(["'change'"]);
   });
 
+  it("computed setter emit", () => {
+    const script = `
+    export default defineComponent({
+      setup(props, { emit }) {
+        const setter = computed({
+          get() {},
+          set() {
+            emit('change');
+          }
+        })
+      }
+    })
+    `;
+    const project = new Project({ tsConfigFilePath: "tsconfig.json" });
+    const sourceFile = project.createSourceFile("test.ts", script);
+
+    const { emits } = insertEmitsOption(sourceFile, "");
+    expect(emits).toEqual(["'change'"]);
+  });
+
   it("multiple emits", () => {
     const script = `
     export default defineComponent({
@@ -55,6 +75,44 @@ describe("composition api", () => {
     const { emits } = insertEmitsOption(sourceFile, "");
 
     expect(emits).toEqual(["'change'"]);
+  });
+
+  it("context.emit", () => {
+    const script = `
+    export default defineComponent({
+      setup(props, context) {
+        context.emit('change');
+      }
+    })
+    `;
+
+    const project = new Project({ tsConfigFilePath: "tsconfig.json" });
+    const sourceFile = project.createSourceFile("test.ts", script);
+
+    const { emits } = insertEmitsOption(sourceFile, "");
+
+    expect(emits).toEqual(["'change'"]);
+  });
+
+  it("function props emit", () => {
+    const script = `
+    export default defineComponent({
+      setup(props, { emit }) {
+        const composables = useEmit(props, { emit });
+
+        return {
+          ...composables
+        }
+      }
+    })
+    `;
+
+    const project = new Project({ tsConfigFilePath: "tsconfig.json" });
+    const sourceFile = project.createSourceFile("test.ts", script);
+
+    const { emits } = insertEmitsOption(sourceFile, "");
+
+    expect(emits).toBeUndefined();
   });
 
   it("template emit", () => {

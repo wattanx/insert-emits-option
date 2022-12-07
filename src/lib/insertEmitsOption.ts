@@ -70,7 +70,7 @@ export const insertEmitsOption = (sourceFile: SourceFile, template: string) => {
 const convertToEmits = (node: ObjectLiteralExpression) => {
   const emitsCallExpressions = node
     .getDescendantsOfKind(SyntaxKind.CallExpression)
-    .filter((x) => x.getFullText().includes("emit")) as CallExpression[];
+    .filter((x) => x.getExpression().getText().includes("emit"));
 
   if (emitsCallExpressions.length === 0) {
     return [];
