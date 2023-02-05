@@ -1,4 +1,7 @@
+This repository has been moved [here](https://github.com/wattanx/wattanx-converter/tree/main/packages/insert-emits-option).
+
 # Insert Emits Option
+
 Get the event name from the emit used in script or template and add it to the emits option as an array.
 
 In Vue3, it is recommended to set the emits option.
